@@ -12,7 +12,8 @@ from sklearn.preprocessing import StandardScaler,OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
-from sklearn.model_selection import train_test_split
+
+
 
 
 from dataclasses import dataclass
@@ -20,26 +21,28 @@ from dataclasses import dataclass
 
 @dataclass
 class DataTransformationConfig:
+    target_column='churn'
     preprocessor_obj_file_path:str=os.path.join('artifacts','preprocessor.pkl')
 
 class DataTransformation:
     def __init__(self):
         self.data_transformation_config=DataTransformationConfig()
 
-    def get_data_transformation_config(self,):
+    def get_preprocessor(self,df):
+
         try:
 
             logging.info("data transformation started")
 
-            df=pd.read_csv('Notebook/data/customer_churn.csv')
-            logging.info("read the data as dataframe")
+            target_col=self.data_transformation_config.target_column
+            X = df.drop(columns=[target_col],axis=1)
 
-            num_cols = df.select_dtypes(include=['int64','float64']).columns
-            cat_cols = df.select_dtypes(include=['object']).columns
+            num_cols = X.select_dtypes(include=['int64','float64']).columns
+            cat_cols = X.select_dtypes(include=['object']).columns
 
             num_pipe= Pipeline(
                 steps=[
-                    ('imputer',SimpleImputer(strategy='most_frequent')),
+                    ('imputer',SimpleImputer(strategy='median')),
                     ('scaler',StandardScaler())
                 ]
             )
@@ -48,7 +51,7 @@ class DataTransformation:
                 steps=[
                     ('imputer',SimpleImputer(strategy='most_frequent')),
                     ('one_hot_encoder',OneHotEncoder(handle_unknown='ignore')),
-                    ('scaler',StandardScaler(with_mean=False))
+                    
                 ]
             )
             preprocessor = ColumnTransformer(
@@ -57,9 +60,10 @@ class DataTransformation:
                     ('cat_pipe',cat_pipe,cat_cols)
                 ]
             )
-            logging.info("data transformation completed")
+            logging.info("preprocessor object created")
 
             return preprocessor
+        
         except Exception as e:
             logging.info("Exception occured in data transformation stage")
             raise CustomException(e,sys)
@@ -73,9 +77,9 @@ class DataTransformation:
 
             logging.info("reading completed")
 
-            preprocessor_obj=self.get_data_transformation_config()
+            preprocessor_obj=self.get_preprocessor(train_df)
 
-            target_col='churn'
+            target_col=self.data_transformation_config.target_column
 
             input_feature_train_df = train_df.drop(columns=[target_col],axis=1)
             target_feature_train_df = train_df[target_col]
@@ -106,4 +110,4 @@ class DataTransformation:
             logging.info("Exception occured in the data transformation stage")
             raise CustomException(e,sys)
 
-        
+    
