@@ -6,4 +6,5 @@ seaborn
 xgboost
 catboost
 flask
+streamlit
 -e .
