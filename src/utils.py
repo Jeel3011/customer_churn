@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import numpy as np
 from src.exeption import CustomException
-from sklearn.metrics import r2_score,roc_auc_score
+from sklearn.metrics import r2_score, roc_auc_score
 from sklearn.model_selection import GridSearchCV
 
 def save_object(file_path, obj):
@@ -20,8 +20,3 @@ def load_object(file_path):
         return obj
     except Exception as e:
         raise CustomException(f"Error loading object: {e}", sys)
-
-
-
-    except Exception as e:
-        raise CustomException(e,sys)
