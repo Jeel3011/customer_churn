@@ -10,3 +10,4 @@ uvicorn
 python-multipart
 requests
 plotly
+boto3
